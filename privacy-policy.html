@@ -20,7 +20,7 @@
 <body>
 
 <h1>Privacy Policy – Turnistica Pedemontana Emergenza</h1>
-<p class="meta">Entrata in vigore: 11 Gennaio 2026 · Ultimo aggiornamento: 25 Maggio 2026 · Versione 2.0</p>
+<p class="meta">Entrata in vigore: 11 Gennaio 2026 · Ultimo aggiornamento: 25 Maggio 2026 · Versione 2.2</p>
 
 <p>La presente informativa descrive il trattamento dei dati personali effettuato tramite
 l'applicazione mobile <strong>Turnistica Pedemontana Emergenza</strong> (di seguito "l'App"),
@@ -44,20 +44,29 @@ D.lgs. 196/2003 (Codice Privacy) come modificato dal D.lgs. 101/2018.</p>
   <li><strong>Dati operativi</strong>: turni assegnati o svolti, indisponibilità inserite, esiti dei controlli mezzo (checklist), scadenze di farmaci e presidi.</li>
 </ul>
 
-<h3>2.2 Dati di autenticazione (solo iOS)</h3>
-<p>L'App utilizza <strong>Sign in with Apple</strong> per autenticare l'utente.
+<h3>2.2 Dati di autenticazione</h3>
+
+<p><strong>iOS</strong>. L'App utilizza <strong>Sign in with Apple</strong> per autenticare l'utente.
 Apple comunica all'App esclusivamente:</p>
 <ul>
   <li>l'identificativo utente Apple (token anonimo);</li>
   <li>l'indirizzo email associato all'Apple ID, oppure un alias di tipo
       <code>@privaterelay.appleid.com</code> se l'utente sceglie "Nascondi la mia email".</li>
 </ul>
-<p>Tali dati sono confrontati con la lista interna del personale autorizzato per stabilire
-i permessi di accesso (utente / amministratore / ospite) e sono conservati localmente
-nel <strong>Portachiavi (Keychain)</strong> del dispositivo per evitare di richiedere
-nuovamente l'autenticazione ad ogni avvio.</p>
+
+<p><strong>Android</strong>. L'App legge dal dispositivo, tramite l'<em>AccountManager</em>
+di sistema, l'<strong>indirizzo email dell'account Google</strong> già configurato sul telefono
+(permesso <code>GET_ACCOUNTS</code>). Non vengono letti né trasmessi password, token o altri dati
+dell'account Google.</p>
+
+<p>In entrambi i casi l'email è confrontata con la lista interna del personale autorizzato per
+stabilire i permessi di accesso (utente / amministratore / ospite) e viene conservata localmente
+nel <strong>Portachiavi (Keychain)</strong> su iOS o nel <strong>Keystore / SharedPreferences</strong>
+su Android, per evitare di richiedere nuovamente l'autenticazione ad ogni avvio.</p>
 
 <h3>2.3 Permessi del dispositivo</h3>
+
+<p><strong>iOS</strong></p>
 <table>
   <tr><th>Permesso</th><th>Scopo</th><th>Dati trasmessi al server</th></tr>
   <tr>
@@ -66,8 +75,43 @@ nuovamente l'autenticazione ad ogni avvio.</p>
     <td>Nessuno. L'App scrive solo nuovi eventi sul calendario locale.</td>
   </tr>
 </table>
-<p>L'App <strong>non richiede e non utilizza</strong> i permessi relativi a Contatti, Fotocamera,
-Microfono, Posizione, Galleria foto, Notifiche push, Bluetooth, Salute o ID pubblicitario.</p>
+
+<p><strong>Android</strong></p>
+<table>
+  <tr><th>Permesso</th><th>Scopo</th><th>Dati trasmessi al server</th></tr>
+  <tr>
+    <td>Calendario (<code>READ_CALENDAR</code>, <code>WRITE_CALENDAR</code>)</td>
+    <td>Esportare i propri turni nel calendario locale del dispositivo.</td>
+    <td>Nessuno.</td>
+  </tr>
+  <tr>
+    <td>Account del dispositivo (<code>GET_ACCOUNTS</code>)</td>
+    <td>Leggere l'indirizzo email dell'account Google del dispositivo per identificare l'utente.</td>
+    <td>L'email viene confrontata con la lista autorizzati e – se l'utente è abilitato – associata ai turni.</td>
+  </tr>
+  <tr>
+    <td>Notifiche (<code>POST_NOTIFICATIONS</code>, Android 13+)</td>
+    <td>Mostrare una notifica locale durante la sincronizzazione in background delle modifiche
+        ai turni e alle scadenze, come richiesto dalla policy Android sui <em>foreground service</em>.</td>
+    <td>Nessuno. La notifica è generata localmente, non vengono usati servizi push.</td>
+  </tr>
+  <tr>
+    <td>Servizio in primo piano per sync (<code>FOREGROUND_SERVICE_DATA_SYNC</code>)</td>
+    <td>Permettere il completamento della sincronizzazione dei dati anche quando l'utente
+        riduce l'App in background.</td>
+    <td>Solo le modifiche pendenti dell'utente, già autorizzate.</td>
+  </tr>
+  <tr>
+    <td>Accesso a Internet e stato della rete
+        (<code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code>)</td>
+    <td>Comunicare con il backend, gestire l'uso offline.</td>
+    <td>Vedi sezione 4.</td>
+  </tr>
+</table>
+
+<p>Su entrambe le piattaforme l'App <strong>non richiede e non utilizza</strong> i permessi relativi a
+Contatti, Fotocamera, Microfono, Posizione (GPS), Galleria foto, Bluetooth, Salute, ID pubblicitario
+(IDFA / AAID), notifiche push remote (FCM/APNs).</p>
 
 <h3>2.4 Dati raccolti automaticamente</h3>
 <p>Durante la comunicazione con i server vengono trasmessi automaticamente i normali dati
@@ -100,10 +144,16 @@ non utilizza cookie pubblicitari, <strong>non traccia l'utente attraverso app o 
   <tr><td><strong>Apple Inc.</strong></td>
       <td>Fornitore del servizio Sign in with Apple e dello store di distribuzione (App Store).</td>
       <td>USA – clausole contrattuali standard (SCC) Apple</td></tr>
-  <tr><td><strong>Cloudflare, Inc.</strong></td>
-      <td>Infrastruttura backend (Cloudflare Workers) ed elaborazione delle chiamate API ai seguenti endpoint:
-          <code>shifts-sync-worker.cristianbortoli77.workers.dev</code> e
-          <code>unaivailabilitydb.cristianbortoli77.workers.dev</code>.</td>
+  <tr><td><strong>Cloudflare, Inc.</strong>
+          (<a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">informativa fornitore</a>)</td>
+      <td>Fornisce l'infrastruttura backend tramite il servizio
+          <a href="https://workers.cloudflare.com/" target="_blank" rel="noopener">Cloudflare Workers</a>
+          su cui l'Organizzazione ha attivato due servizi privati dedicati:
+          uno per turni e scadenze, uno per le indisponibilità.
+          Tutte le comunicazioni avvengono in HTTPS / TLS 1.2+. Cloudflare può accedere ai
+          dati esclusivamente in qualità di responsabile tecnico ai fini dell'erogazione del servizio.
+          I percorsi tecnici degli endpoint non sono diffusi in chiaro per ridurre il rischio
+          di accessi automatizzati alla risorsa.</td>
       <td>USA / UE – Cloudflare opera ai sensi delle SCC della Commissione UE</td></tr>
   <tr><td><strong>Google LLC</strong></td>
       <td>Archiviazione strutturata dei turni, delle indisponibilità, delle scadenze e della lista
@@ -115,7 +165,22 @@ non utilizza cookie pubblicitari, <strong>non traccia l'utente attraverso app o 
 <p>Nessun dato viene venduto, ceduto o comunicato a terzi al di fuori dei suddetti
 fornitori tecnici essenziali al funzionamento del servizio.</p>
 
-<h2>5. Conservazione locale sul dispositivo</h2>
+<h2>5. Invio assistito di email (checklist e scadenze)</h2>
+<p>Al termine della compilazione di una checklist mezzo o del controllo scadenze, l'App offre la
+possibilità di inviare il PDF generato all'indirizzo organizzativo
+<code>cheklist.pedemontana@gmail.com</code>. L'invio <strong>non è automatico</strong>:</p>
+<ul>
+  <li>su <strong>iOS</strong> viene aperto il modulo di composizione di
+      <em>Mail</em> di sistema, con destinatario, oggetto e allegato già precompilati;
+      l'utente deve premere "Invia" per inoltrare il messaggio dal proprio account email;</li>
+  <li>su <strong>Android</strong> viene aperto un selettore di applicazioni email
+      (intento <code>ACTION_SEND</code>, MIME <code>message/rfc822</code>); anche in questo caso
+      l'invio effettivo è eseguito dall'app email scelta dall'utente e con il suo account.</li>
+</ul>
+<p>L'App non dispone di credenziali SMTP proprie e non invia email "in background". Nessuna copia
+del messaggio rimane sui server gestiti dal Titolare.</p>
+
+<h2>6. Conservazione locale sul dispositivo</h2>
 <p>Per consentire il funzionamento offline e ridurre i consumi di rete, l'App memorizza
 sul dispositivo dell'utente:</p>
 <ul>
@@ -125,7 +190,7 @@ sul dispositivo dell'utente:</p>
 </ul>
 <p>Tutti questi dati sono accessibili esclusivamente all'App stessa e vengono rimossi alla disinstallazione.</p>
 
-<h2>6. Tempi di conservazione</h2>
+<h2>7. Tempi di conservazione</h2>
 <table>
   <tr><th>Tipo di dato</th><th>Periodo di conservazione</th></tr>
   <tr><td>Lista utenti autorizzati (server)</td>
@@ -138,7 +203,7 @@ sul dispositivo dell'utente:</p>
       <td>Fino alla disinstallazione dell'App o cancellazione manuale dalle impostazioni del sistema.</td></tr>
 </table>
 
-<h2>7. Diritti dell'interessato</h2>
+<h2>8. Diritti dell'interessato</h2>
 <p>L'utente può esercitare in ogni momento, ai sensi degli articoli 15-22 GDPR, i diritti di:</p>
 <ul>
   <li>accesso ai propri dati (art. 15);</li>
@@ -155,23 +220,23 @@ L'utente ha inoltre diritto di proporre reclamo al
 <strong>Garante per la Protezione dei Dati Personali</strong>
 (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">www.garanteprivacy.it</a>).</p>
 
-<h2>8. Sicurezza</h2>
+<h2>9. Sicurezza</h2>
 <p>Tutte le comunicazioni tra App e server avvengono in <strong>HTTPS/TLS 1.2+</strong>.
 Le credenziali dell'utente sono conservate nel Portachiavi del sistema operativo, cifrato a
 livello hardware. L'App non utilizza algoritmi di cifratura proprietari né non standard
 (<em>standard encryption only</em>).</p>
 
-<h2>9. Minori</h2>
+<h2>10. Minori</h2>
 <p>L'App è destinata a soggetti maggiorenni che svolgono attività di soccorso per l'Organizzazione.
 Non è progettata per essere utilizzata da minori di 14 anni e non raccoglie consapevolmente
 dati di minori.</p>
 
-<h2>10. Modifiche</h2>
+<h2>11. Modifiche</h2>
 <p>Il Titolare si riserva il diritto di apportare modifiche alla presente informativa.
 Ogni aggiornamento sarà pubblicato a questo indirizzo con la nuova data di entrata in vigore;
 in caso di modifiche sostanziali sarà data evidenza anche all'interno dell'App.</p>
 
-<h2>11. Contatti</h2>
+<h2>12. Contatti</h2>
 <p>
   <strong>Pedemontana Emergenza ODV</strong><br>
   Via Monte Grappa, 17 – 31017 Pieve del Grappa (TV)<br>
